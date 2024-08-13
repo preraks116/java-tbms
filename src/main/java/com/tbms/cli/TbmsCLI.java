@@ -5,6 +5,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
 import com.tbms.service.BankService;
+import com.tbms.service.BestConversion;
 import com.tbms.service.ExchangeService;
 import com.tbms.model.Bank;
 
@@ -16,10 +17,12 @@ public class TbmsCLI implements Runnable {
 
     private CommandLine commandLine;
     private BankService bankService = new BankService();
+    private BestConversion bestConversion;
 
     public TbmsCLI() {
         System.out.println("Welcome to the TBMS CLI!");
         this.commandLine = new CommandLine(this);
+        this.bestConversion = new BestConversion();
     }
 
     @Command(name = "help", description = "Display help information")
@@ -64,6 +67,8 @@ public class TbmsCLI implements Runnable {
             Bank bank = bankService.getBank(bankName);
             bank.getExchangeService().addCurrency(currency);
 
+            bestConversion.addCurrency(currency);
+
             System.out.println("Added currency to " + bankName + ": " + currency);
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
@@ -77,6 +82,8 @@ public class TbmsCLI implements Runnable {
         try {
             Bank bank = bankService.getBank(bankName);
             bank.getExchangeService().deleteCurrency(currency);
+
+            bestConversion.deleteCurrency(currency);
 
             System.out.println("Deleted currency from " + bankName + ": " + currency);
         } catch (IllegalArgumentException e) {
@@ -94,6 +101,8 @@ public class TbmsCLI implements Runnable {
             Bank bank = bankService.getBank(bankName);
             bank.getExchangeService().addExchangeRate(fromCurrency, toCurrency, rate);
 
+            bestConversion.addRate(fromCurrency, toCurrency, rate, bankName);
+
             System.out.println("Added exchange rate for " + bankName + ": " + fromCurrency + " to " + toCurrency + " at " + rate);
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
@@ -107,7 +116,13 @@ public class TbmsCLI implements Runnable {
             @Parameters(paramLabel = "TO_CURRENCY", description = "The currency to convert to") String toCurrency) {
         try {
             Bank bank = bankService.getBank(bankName);
-            bank.getExchangeService().deleteExchangeRate(fromCurrency, toCurrency);
+            ExchangeService exchangeService = bank.getExchangeService();
+
+            double rate = exchangeService.getExchangeRate(fromCurrency, toCurrency);
+            exchangeService.deleteExchangeRate(fromCurrency, toCurrency);
+            
+            // worst
+            bestConversion.deleteRate(rate, fromCurrency, toCurrency, bankService.getBanks());
 
             System.out.println("Deleted exchange rate for " + bankName + ": " + fromCurrency + " to " + toCurrency);
         } catch (IllegalArgumentException e) {
@@ -155,11 +170,15 @@ public class TbmsCLI implements Runnable {
         }
     }
 
-    @Command(name = "get-best-rate", description = "Get the best exchange rate between two currencies across all banks")
+    @Command(name = "get-best-conversion", description = "Get the best conversion path between two currencies across all banks")
     public void getBestRate(
             @Parameters(paramLabel = "FROM_CURRENCY", description = "The currency to convert from") String fromCurrency,
             @Parameters(paramLabel = "TO_CURRENCY", description = "The currency to convert to") String toCurrency) {
-        System.out.println("Best exchange rate for " + fromCurrency + " to " + toCurrency + " is 1.0");
+        try {
+            bestConversion.getBestConversion(fromCurrency, toCurrency);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     @Override

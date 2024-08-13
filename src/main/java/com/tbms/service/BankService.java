@@ -5,16 +5,19 @@ import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import com.tbms.model.Bank;
+import com.tbms.util.ExchangeEdge;
 
 import java.util.*;
 
 public class BankService {
     private Map<String, Bank> banks;
-    
-    // i want define a graph with best exchange rate where each vertex is a bank and each edge is pair of the best exchange rate and the bank that has it
 
     public BankService() {
         this.banks = new HashMap<>();
+    }
+
+    public Map<String, Bank> getBanks() {
+        return banks;
     }
 
     public Set<String> getAllBankNames() {

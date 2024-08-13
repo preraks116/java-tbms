@@ -59,8 +59,7 @@ public class ExchangeService {
 
         DefaultWeightedEdge edge = currencyGraph.getEdge(fromCurrency, toCurrency);
         if (edge == null) {
-            throw new IllegalStateException("No exchange rate found between " +
-                CurrencyUtils.formatCurrencyPair(fromCode, toCode));
+            return Double.MAX_VALUE;
         }
         return 1 / currencyGraph.getEdgeWeight(edge);
     }
