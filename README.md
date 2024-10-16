@@ -42,3 +42,11 @@ TBMS is a Java-based application that provides functionalities for managing bank
 ## Commands
 
 Type `help` to see the list of commands and their usages.
+
+## Running the GUI
+
+To run the GUI application, use the `--gui` argument:
+
+```
+java -jar target/currency-exchange-system-1.0-SNAPSHOT.jar --gui
+```
