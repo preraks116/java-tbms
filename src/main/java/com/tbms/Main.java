@@ -1,6 +1,7 @@
 package com.tbms;
 
 import com.tbms.cli.TbmsCLI;
+import com.tbms.gui.GuiApp;
 
 import java.util.Scanner;
 
@@ -9,6 +10,10 @@ public class Main {
         TbmsCLI tbmsCLI = new TbmsCLI();
 
         if (args.length > 0) {
+            if (args[0].equals("--gui")) {
+                GuiApp.main(args);
+                return;
+            }
             // Command-line mode
             int exitCode = tbmsCLI.executeCommand(args);
             System.exit(exitCode);
